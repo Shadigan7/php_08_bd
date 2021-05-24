@@ -1,38 +1,19 @@
 <?php
 
-/** 
- * Inicjalizacja już prawie kompletnego frameworka
- *
- * @author Przemysław Kudłacik
- */
-
 require_once 'core/Config.class.php';
 $conf = new core\Config();
 require_once 'config.php'; //ustaw konfigurację
 
-function &getConf(){
-	global $conf; return $conf;
-}
+function &getConf(){ global $conf; return $conf; }
 
-require_once 'core/Messages.class.php'; //załaduj i stwórz Messages
+//załaduj definicję klasy Messages i stwórz obiekt
+require_once 'core/Messages.class.php';
 $msgs = new core\Messages();
-function &getMessages(){
-	global $msgs; return $msgs;
-}
 
-require_once 'core/ClassLoader.class.php'; //załaduj i stwórz loader klas
-$cloader = new core\ClassLoader();
-function &getLoader() {
-    global $cloader; return $cloader;
-}
+function &getMessages(){ global $msgs; return $msgs; }
 
-require_once 'core/Router.class.php'; //załaduj i stwórz router
-$router = new core\Router();
-function &getRouter() {
-    global $router; return $router;
-}
-
-$smarty = null;	//przygotuj Smarty, twórz tylko raz - wtedy kiedy potrzeba
+//przygotuj Smarty, twórz tylko raz - wtedy kiedy potrzeba
+$smarty = null;	
 function &getSmarty(){
 	global $smarty;
 	if (!isset($smarty)){
@@ -50,25 +31,42 @@ function &getSmarty(){
 	}
 	return $smarty;
 }
-
 $db = null; //przygotuj Medoo, twórz tylko raz - wtedy kiedy potrzeba
 function &getDB() {
     global $conf, $db;
     if (!isset($db)) {
-        require_once 'lib/medoo/Medoo.php';
+        require_once 'medoo/Medoo.class.php';
         $db = new \Medoo\Medoo([
-            'database_type' => &$conf->db_type,
-            'server' => &$conf->db_server,
-            'database_name' => &$conf->db_name,
-            'username' => &$conf->db_user,
-            'password' => &$conf->db_pass,
-            'charset' => &$conf->db_charset,
-            'port' => &$conf->db_port,
-            'prefix' => &$conf->db_prefix,
-            'option' => &$conf->db_option
+            'database_type' => 'mysql',
+            'database_name' => 'kalkulator',
+            'server' => 'localhost',
+            'username' => 'root',
+            'password' => '',
+
+            'charset' => 'utf8',
+            'collation' => 'utf8_polish_ci',
+            'port' => 3306,
+
+            'option' => [
+                \PDO::ATTR_CASE => \PDO::CASE_NATURAL,
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+            ],
         ]);
     }
     return $db;
+}
+
+require_once 'core/ClassLoader.class.php'; //załaduj i stwórz loader klas
+$cloader = new core\ClassLoader();
+function &getLoader() {
+    global $cloader;
+    return $cloader;
+}
+
+require_once 'core/Router.class.php';
+$router = new core\Router();
+function &getRouter(): core\Router {
+    global $router; return $router;
 }
 
 require_once 'core/functions.php';
@@ -76,4 +74,4 @@ require_once 'core/functions.php';
 session_start(); //uruchom lub kontynuuj sesję
 $conf->roles = isset($_SESSION['_roles']) ? unserialize($_SESSION['_roles']) : array(); //wczytaj role
 
-$router->setAction( getFromRequest('action') );
+$action = getFromRequest('action');

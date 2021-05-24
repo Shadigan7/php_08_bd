@@ -18,7 +18,7 @@ class Router {
     public function getAction() {
         return $this->action;
     }
-    
+
     public function addRouteEx($action, $namespace, $controller, $method, $roles = null) {
         $this->routes[$action] = new Route($namespace, $controller, $method, $roles);
     }
@@ -56,7 +56,7 @@ class Router {
             $controller = "app\\controllers\\" . $controller;
         } else {
             $controller = $namespace . "\\" . $controller;
-        }	
+        }
         $ctrl = new $controller;
         if (method_exists($ctrl, $method)) {
             $ctrl->$method();
